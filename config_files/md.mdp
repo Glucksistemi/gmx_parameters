@@ -1,0 +1,67 @@
+cutoff-scheme = Verlet
+; 7.3.3 Run Control
+integrator              = md                    ; md integrator
+tinit                   = 0                     ; [ps] starting time for run
+dt                      = 0.002                 ; [ps] time step for integration
+nsteps                  = {md_steps}             ; maximum number of steps to integrate, 0.002 * 250,000 = 500 ps
+comm_mode               = Linear                ; remove center of mass translation
+nstcomm                 = 10                     ; [steps] frequency of mass motion removal
+nstcalcenergy                 = 10                     ; [steps] frequency of mass motion removal
+comm_grps               = Protein Non-Protein   ; group(s) for center of mass motion removal
+
+; 7.3.8 Output Control
+nstxout                 = 50000         ; [steps] freq to write coordinates to trajectory
+nstvout                 = 500000         ; [steps] freq to write velocities to trajectory
+nstfout                 = 0         ; [steps] freq to write forces to trajectory
+nstlog                  = 10000           ; [steps] freq to write energies to log file
+nstenergy               = 10000           ; [steps] freq to write energies to energy file
+nstxtcout               = 5000           ; [steps] freq to write coordinates to xtc trajectory
+xtc_grps                = System        ; group(s) to write to xtc trajectory
+
+; 7.3.9 Neighbor Searching
+nstlist                 = 10             ; [steps] freq to update neighbor list
+ns_type                 = grid          ; method of updating neighbor list
+pbc                     = xyz           ; periodic boundary conditions in all directions
+rlist                   = 1.2           ; [nm] cut-off distance for the short-range neighbor list
+
+; 7.3.10 Electrostatics
+coulombtype             = PME           ; Particle-Mesh Ewald electrostatics
+rcoulomb                = 1.2          ; [nm] distance for Coulomb cut-off
+
+; 7.3.11 VdW
+vdwtype                 = cut-off       ; twin-range cut-off with rlist where rvdw >= rlist
+vdw-modifier = force-switch
+rvdw                    = 1.2           ; [nm] distance for LJ cut-off
+rvdw-switch = 1.0
+DispCorr                = no      ; apply long range dispersion corrections
+
+; 7.3.13 Ewald
+fourierspacing          = 0.12          ; [nm] grid spacing for FFT grid when using PME
+pme_order               = 4             ; interpolation order for PME, 4 = cubic
+ewald_rtol              = 1e-5          ; relative strength of Ewald-shifted potential at rcoulomb
+
+; 7.3.14 Temperature Coupling
+tcoupl                  = v-rescale                     ; temperature coupling with V-rescale-thermostat
+tc_grps                 = Protein    Non-Protein        ; groups to couple seperately to temperature bath
+tau_t               =  0.1      0.1
+ref_t               =  {md_temp}      {md_temp}
+
+pcoupl              =  Berendsen
+pcoupltype          =  isotropic
+tau_p               =  1.0
+compressibility     =  4.5e-5   4.5e-5
+ref_p               =  {md_press}      {md_press}
+
+
+; 7.3.17 Velocity Generation
+gen_vel                 = no           ; generate velocities according to Maxwell distribution of temperature
+gen_temp                = {md_temp}           ; [K] temperature for Maxwell distribution
+gen_seed                = -1            ; [integer] used to initialize random generator for random velocities
+
+; 7.3.18 Bonds
+constraints             = h-bonds     ; convert all bonds to constraints
+constraint_algorithm    = LINCS         ; LINear Constraint Solver
+continuation            = no            ; no = apply constraints to the start configuration
+lincs_order             = 4             ; highest order in the expansion of the contraint coupling matrix
+lincs_iter              = 1             ; number of iterations to correct for rotational lengthening
+lincs_warnangle         = 30            ; [degrees] maximum angle that a bond can rotate before LINCS will complain
